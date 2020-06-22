@@ -49,7 +49,7 @@ Then airflow should be accessible at [http://localhost:8080](http://localhost:80
 ### building
 
 ```bash
-git clone https://github.com/Pret-a-LLOD/teanga-executor-service.git ./teanga-core
+git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga-core
 ```
 
 ```bash
