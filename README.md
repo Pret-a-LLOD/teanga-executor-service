@@ -1,10 +1,33 @@
-# Docs
+# Teanga
 
-## Teanga-Backend
+## Quick start
+If you have wget command installed in your terminal:
+
+`
+wget -O - https://raw.githubusercontent.com/berstearns/cliable/master/install.sh | sudo bash
+`
+
+If you have curl command installed in your terminal:
+
+`
+curl https://raw.githubusercontent.com/berstearns/cliable/master/install.sh | sudo bash
+`
+
+## Requirements
+
+- docker
+- access to docker.sock file
+- some default PORTS should be free:
+8080
+8000:8000+{numbers_of_services}
+
+### Installing teanga
+
+### Teanga-Backend
 
 Teanga backend is the core component of Teanga which coordinates a sequence of services(implemented as docker containers) by matching input and output based on services dependencies. 
 
-## Understanding Teanga-Backend
+###  Understanding Teanga-Backend
 
 This repository contains three different parts:
 
@@ -15,15 +38,8 @@ This repository contains three different parts:
 3. [Teanga-backend client](https://gitlab.insight-centre.org/berste/teanga-dev/tree/dev/teanga-client) (cli):
     1. use this repo if you want to use pre-built teanga docker image in a workflow you have
 
-## Requirements
 
-- docker
-- access to docker.sock file
-- some PORTS should be free:
-8080
-8000:8000+{numbers_of_services}
-
-## Quick start
+### installing teanga manually 
 
 ```bash
 git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga
@@ -43,10 +59,7 @@ Then airflow should be accessible at [http://localhost:8080](http://localhost:80
 
 ![https://i.ibb.co/jyvypZ1/Screenshot-2020-05-08-at-05-16-21.png](https://i.ibb.co/jyvypZ1/Screenshot-2020-05-08-at-05-16-21.png)
 
-
-## Run Teanga-Backend manually
-
-### building
+### building teanga manually
 
 ```bash
 git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga
