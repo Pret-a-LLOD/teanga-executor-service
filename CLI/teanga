@@ -1,0 +1,64 @@
+#!/bin/bash
+
+AVAILABLE_SERVICES=("service" "workflow")
+AVAILABLE_WORKFLOW_COMMANDS=("run" "create" "visualize")
+AVAILABLE_FLAGS=("-f" "-p" "--output-dir")
+show_usage () {
+    USAGE="Usage: $0 [COMMAND] [SERVICE]  [PARAMETERS] "
+    echo $USAGE
+    echo "Available SERVICES: "${AVAILABLE_SERVICES[@]}
+	exit 1
+}
+
+check_if_in_list () {
+    VALID_COMMAND=0
+    local INPUT=$1
+    shift 1
+    for AVAILABLE_COMMAND in "$@";
+    do
+        if [[ "$INPUT" == "$AVAILABLE_COMMAND" ]];
+        then
+            VALID_COMMAND=1
+        fi
+    done
+    if [ $VALID_COMMAND -eq 1 ];
+    then
+        :
+    else
+        show_usage
+    fi
+}
+
+if [ "$#" -lt "2" ]; then
+    show_usage
+fi
+
+INPUT_COMMAND=$1
+INPUT_COMMAND_UPPER=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+shift 1
+INPUT_SERVICE=$1
+INPUT_SERVICE_UPPER=$(echo "$1" | tr '[:lower:]' '[:upper:]')
+shift 1
+
+AVAILABLE_COMMANDS_FOR_SERVICE="AVAILABLE_"$INPUT_SERVICE_UPPER"_COMMANDS[@]"
+check_if_in_list $INPUT_COMMAND ${!AVAILABLE_COMMANDS_FOR_SERVICE} 
+echo "  "
+check_if_in_list $INPUT_SERVICE ${AVAILABLE_SERVICES[@]} 
+
+VALID_PARAMS=();
+while [[ -n "$@" ]];
+do
+    INPUT_FLAG=$1
+    shift 1;
+    check_if_in_list $INPUT_FLAG ${AVAILABLE_FLAGS[@]} 
+    INPUT_PARAMETER=$1
+    shift 1;
+    VALID_PARAMS+=("${INPUT_FLAG} ${INPUT_PARAMETER}")
+done
+
+RUN_WORKFLOW () {
+    echo "$@";
+}
+
+CALLED_FUNCTION="${INPUT_COMMAND_UPPER}_${INPUT_SERVICE_UPPER}"
+$CALLED_FUNCTION ${VALID_PARAMS[@]}
