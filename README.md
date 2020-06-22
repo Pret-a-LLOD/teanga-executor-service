@@ -26,11 +26,11 @@ This repository contains three different parts:
 ## Quick start
 
 ```bash
-git clone https://github.com/berstearns/teanga-client.git ./teanga-client
+git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga
 ```
 
 ```bash
-cd ./teanga-client
+cd ./teanga/teanga-client
 ```
 
 ```bash
@@ -49,11 +49,11 @@ Then airflow should be accessible at [http://localhost:8080](http://localhost:80
 ### building
 
 ```bash
-git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga-core
+git clone https://gitlab.insight-centre.org/berste/teanga-dev ./teanga
 ```
 
 ```bash
-cd ./teanga-core
+cd ./teanga/teanga-core
 ```
 
 ```bash
