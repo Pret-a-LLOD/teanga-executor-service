@@ -8,11 +8,11 @@ Teanga backend is the core component of Teanga which coordinates a sequence of s
 
 This repository contains three different parts:
 
-1. [Teanga-backend core](https://github.com/Pret-a-LLOD/teanga-executor-service)
+1. [Teanga-backend core](https://gitlab.insight-centre.org/berste/teanga-dev/tree/dev/teanga-client)
     1.  use this repo if you want to build teanga-backend from scratch
-2. [Teanga-backend services](https://github.com/berstearns/teanga_services)
+2. [Teanga-backend services](https://gitlab.insight-centre.org/berste/teanga-dev/tree/dev/teanga-services)
     1. if  you want create teanga-services use this repo to see templates examples
-3. [Teanga-backend client](https://github.com/berstearns/teanga-client) (cli):
+3. [Teanga-backend client](https://gitlab.insight-centre.org/berste/teanga-dev/tree/dev/teanga-client) (cli):
     1. use this repo if you want to use pre-built teanga docker image in a workflow you have
 
 ## Requirements
