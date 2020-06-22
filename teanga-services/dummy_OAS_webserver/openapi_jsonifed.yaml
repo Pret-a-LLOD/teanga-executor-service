@@ -1,0 +1,64 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Vocabulary API
+servers:
+    - url: http://localhost:8000
+paths:
+  /vocabulary/{language}/top/{number_of_words}:
+    get:
+      summary: List all words
+      operationId: listTopK
+      parameters:
+        - name: language
+          in: path
+          description: language of the vocabulary
+          required: true
+          schema:
+            type: string
+            enum: ["en","sp","ge"]
+        - name: number_of_words
+          in: path
+          description: How many top words return at one time (max 100)
+          required: true 
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A paged array of words
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Words"
+  /wordembeddings:
+    post:
+      summary: calculate word embeddings for each sentence in as list of sentences
+      operationId: calculateWordEmbeddings 
+      requestBody:
+          required: true
+          content:
+              application/json:
+                schema:
+                    $ref: "#/components/schemas/Words"
+      responses:
+        '200':
+          description: word embbedings foreach word of a list of words 
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/Embeddings"
+components:
+  schemas:
+    Words:
+      type: object
+      properties:
+          word_list:
+              type: string
+              additionalProperties: {}
+    Embeddings:
+      type: object
+      properties:
+          embeddings:
+              type: string
+              additionalProperties: {}

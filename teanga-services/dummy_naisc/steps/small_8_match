@@ -1,0 +1,10 @@
+[{'_property': 'http://www.w3.org/2004/02/skos/core#exactMatch',
+ 'entity1': {'dataset': 'left', 'uri': 'http://mouse.owl'},
+ 'entity2': {'dataset': 'right', 'uri': 'http://human.owl'},
+ 'probability': 1.0}, {'_property': 'http://www.w3.org/2004/02/skos/core#exactMatch',
+ 'entity1': {'dataset': 'left', 'uri': 'http://mouse.owl#MA_0002433'},
+ 'entity2': {'dataset': 'right', 'uri': 'http://human.owl#NCI_C12219'},
+ 'probability': 0.3062693244572313}, {'_property': 'http://www.w3.org/2004/02/skos/core#exactMatch',
+ 'entity1': {'dataset': 'left', 'uri': 'http://mouse.owl#UNDEFINED_part_of'},
+ 'entity2': {'dataset': 'right', 'uri': 'http://human.owl#UNDEFINED_part_of'},
+ 'probability': 0.70504732075624}]

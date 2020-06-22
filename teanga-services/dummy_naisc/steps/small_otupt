@@ -1,0 +1,3 @@
+<http://mouse.owl> <http://www.w3.org/2004/02/skos/core#exactMatch> <http://human.owl> .
+<http://mouse.owl#MA_0002433> <http://www.w3.org/2004/02/skos/core#exactMatch> <http://human.owl#NCI_C12219> .
+<http://mouse.owl#UNDEFINED_part_of> <http://www.w3.org/2004/02/skos/core#exactMatch> <http://human.owl#UNDEFINED_part_of> .

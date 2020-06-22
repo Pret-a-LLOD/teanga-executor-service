@@ -1,0 +1,20 @@
+{
+    "1":{
+        "repo":"",
+        "image_id":"postgres",
+        "image_tag":"latest",
+        "port":8000
+    },
+    "2":{
+        "repo":"berstearns",
+        "image_id":"flaskapp",
+        "image_tag":"v7",
+        "port":8001
+    },
+    "3":{
+        "repo":"",
+        "image_id":"ubuntu",
+        "image_tag":"latest",
+        "port":8002
+    }
+}

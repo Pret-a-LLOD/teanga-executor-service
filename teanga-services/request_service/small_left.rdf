@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://mouse.owl#"
+     xml:base="http://mouse.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:oboRel="http://www.obofoundry.org/ro/ro.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#">
+    <owl:Ontology rdf:about="http://mouse.owl">
+        <oboInOwl:hasDate rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2007-01-18T12:17:00</oboInOwl:hasDate>
+        <oboInOwl:hasDefaultNamespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">adult_mouse_anatomy.gxd</oboInOwl:hasDefaultNamespace>
+        <oboInOwl:savedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string">terryh</oboInOwl:savedBy>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasDbXref"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasDefaultNamespace"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasAlternativeId"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#savedBy"/>
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasDate"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mouse.owl#UNDEFINED_is_a -->
+
+    <owl:ObjectProperty rdf:about="http://mouse.owl#UNDEFINED_is_a">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">is a</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://mouse.owl#UNDEFINED_part_of -->
+
+    <owl:ObjectProperty rdf:about="http://mouse.owl#UNDEFINED_part_of">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Part of</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#ObsoleteProperty -->
+
+    <owl:ObjectProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#ObsoleteProperty"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://mouse.owl#MA_0000001 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000001">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mouse anatomy</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000002 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000002">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">spinal cord grey matter</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0001112"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0000216"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000003 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000003">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">organ system</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0002405"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000004 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000004">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">trunk</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002433"/>
+        <oboInOwl:hasRelatedSynonym rdf:resource="http://mouse.owl#genid1217"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000005 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000005">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">body cavity/lining</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002433"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000006 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000006">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">head/neck</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002433"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000007 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000007">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">limb</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002433"/>
+        <oboInOwl:hasRelatedSynonym rdf:resource="http://mouse.owl#genid1088"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000008 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000008">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">tail</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002433"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000009 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000009">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">adipose tissue</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0000011"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000010 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000010">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cardiovascular system</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0000003"/>
+        <oboInOwl:hasRelatedSynonym rdf:resource="http://mouse.owl#genid679"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0000011 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000011">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">connective tissue</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0000003"/>
+    </owl:Class>
+
+    <!-- http://mouse.owl#MA_0000018 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0000018">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">skeletal system</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0002418"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+    <!-- http://mouse.owl#MA_0002405 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002405">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">adult mouse</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0000001"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <oboInOwl:hasDbXref rdf:resource="http://mouse.owl#genid-A0"/>
+        <oboInOwl:hasRelatedSynonym rdf:resource="http://mouse.owl#genid432"/>
+    </owl:Class>
+
+    <!-- http://mouse.owl#MA_0002418 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002418">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">musculoskeletal system</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0000003"/>
+    </owl:Class>
+
+    <!-- http://mouse.owl#MA_0002433 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002433">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">anatomic region</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0002405"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+    <!-- http://mouse.owl#MA_0002450 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002450">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">body fluid/substance</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://mouse.owl#UNDEFINED_part_of"/>
+                <owl:someValuesFrom rdf:resource="http://mouse.owl#MA_0002405"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+
+    <!-- http://mouse.owl#MA_0002504 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002504">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">exocrine gland fluid/secretion</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002450"/>
+    </owl:Class>
+    
+
+
+    <!-- http://mouse.owl#MA_0002505 -->
+
+    <owl:Class rdf:about="http://mouse.owl#MA_0002505">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mammary gland fluid/secretion</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://mouse.owl#MA_0002504"/>
+    </owl:Class>
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#DbXref -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#DbXref"/>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#Definition -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#Definition"/>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#ObsoleteClass -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#ObsoleteClass"/>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#Subset -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#Subset"/>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#Synonym -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#Synonym"/>
+    
+
+
+    <!-- http://www.geneontology.org/formats/oboInOwl#SynonymType -->
+
+    <owl:Class rdf:about="http://www.geneontology.org/formats/oboInOwl#SynonymType"/>
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Thing -->
+
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.0.0.1413) http://owlapi.sourceforge.net -->
+

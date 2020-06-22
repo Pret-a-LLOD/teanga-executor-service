@@ -1,0 +1,1 @@
+docker run -it --net mynet2 -v $(pwd):/app --publish 4000:4000 testing_teanga tmux
