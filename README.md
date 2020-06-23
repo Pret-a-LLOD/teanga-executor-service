@@ -21,7 +21,7 @@ curl https://raw.githubusercontent.com/berstearns/cliable/master/install.sh | su
 8080
 8000:8000+{numbers_of_services}
 
-### Installing teanga
+### Installing Teanga Manually
 
 ### Teanga-Backend
 
