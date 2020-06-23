@@ -108,3 +108,6 @@ venv.bak/
 .bash_history
 commands/
 docs/
+teanga-services/request_service/_Dockerfile_alpine
+teanga-services/request_service/_Dockerfile_original
+teanga-services/request_service/_Dockerfile_ubuntu_small

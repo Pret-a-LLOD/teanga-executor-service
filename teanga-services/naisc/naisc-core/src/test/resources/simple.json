@@ -1,0 +1,19 @@
+{
+    "blocking": {
+        "name": "blocking.All"
+    },
+    "lenses": [{
+        "name": "lens.Label"
+    }],
+    "textFeatures": [{
+        "name": "feature.BasicString"
+    }],
+    "scorers": [{
+        "name": "scorer.Average"
+    }],
+    "matcher": {
+        "name": "matcher.Threshold",
+        "threshold": "0.5"
+    }
+}
+
