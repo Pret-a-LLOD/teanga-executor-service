@@ -255,7 +255,7 @@ dag = generate_dag(f"teangaWorkflow","runs the workflow described in given workf
 
 base_folder=os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 today_date = datetime.datetime.now().strftime("%d%m%Y")
-workflow_filename = f'dev_naisc_workflow_{today_date}.json'#"dev_workflow.json"
+workflow_filename = os.environ['TARGET_WORKFLOW'] #f'dev_naisc_workflow_{today_date}.json'#"dev_workflow.json"
 workflow_filepath = os.path.join(base_folder,"workflows",workflow_filename)
 operators_instances = {}
 
