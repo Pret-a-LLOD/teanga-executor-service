@@ -53,28 +53,48 @@ do
     check_if_in_list $INPUT_FLAG ${AVAILABLE_FLAGS[@]} 
     INPUT_PARAMETER=$1
     shift 1;
-    VALID_PARAMS+=("${INPUT_FLAG} ${INPUT_PARAMETER}")
+    VALID_PARAMS+=("${INPUT_FLAG}=${INPUT_PARAMETER}")
 done
 
 RUN_WORKFLOW () {
-    echo "$@";
+    for str_PAIR in "$@";
+    do
+        arr_PAIR=(${str_PAIR//=/ })
+        FLAG=${arr_PAIR[0]};
+        PARAMETER=${arr_PAIR[1]};
+        if [ "$FLAG" = "-f" ];
+        then
+            WORKFLOW_FILEPATH=$PARAMETER;
+            FILENAME="${WORKFLOW_FILEPATH##*\/}"
+        elif [ "$FLAG" = "-p" ];
+        then
+            PORT=$PARAMETER;
+            echo $PORT;
+        else
+            show_usage;
+        fi
+        echo "-------";
+    done
     if [ -z "$PWD" ]
     then
-          echo "\$PWD is empty, trying to set $PWD with $(PWD)"
+          echo "\$PWD is empty, trying to set $PWD with $(pwd)"
           PWD=$(pwd)
     else
-          echo "\$PWD is NOT empty, so using it as base_folder"
+          echo "\$PWD is ${PWD}, so using it as base_folder"
     fi
     mkdir -p IO
     mkdir -p OAS
     mkdir -p workflows
+    cp $WORKFLOW_FILEPATH ./workflows/$FILENAME
     docker run -dt --rm --name teanga_backend \
                -v /var/run/docker.sock:/var/run/docker.sock \
                -v $PWD/workflows:/teanga/workflows \
                -v $PWD/OAS:/teanga/OAS \
                -e TEANGA_DIR=$PWD \
-               -p 8080:8080 \
-               teanga_backend:dev
+               -e TARGET_WORKFLOW=$FILENAME \
+               -e RUN_DAG=true \
+               -p $PORT:8080 \
+               teanga_backend:`date +"%d%m%Y"`
 }
 
 CALLED_FUNCTION="${INPUT_COMMAND_UPPER}_${INPUT_SERVICE_UPPER}"
