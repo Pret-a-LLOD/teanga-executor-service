@@ -94,7 +94,7 @@ RUN_WORKFLOW () {
                -e TARGET_WORKFLOW=$FILENAME \
                -e RUN_DAG=true \
                -p $PORT:8080 \
-               teanga_backend:`date +"%d%m%Y"`
+               berstearns/teanga_backend:`date +"%m%Y"`
 }
 
 CALLED_FUNCTION="${INPUT_COMMAND_UPPER}_${INPUT_SERVICE_UPPER}"
