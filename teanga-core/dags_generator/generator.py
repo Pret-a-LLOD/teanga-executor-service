@@ -1,8 +1,12 @@
 from datetime import timedelta
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators import PythonOperator
+from airflow.operators import SubDagOperator
 from airflow.utils.dates import days_ago
 
+import docker
 import sys
 import logging
 import os
@@ -67,47 +71,7 @@ def generate_setup_operators(unique_services): #{{
         d = services_instances[0][1]
         airflow_imageName = full_imagePath.replace("/","--").replace(":","--") 
         task_id=f"setup-{airflow_imageName}--{d['port']}"
-        command=f"docker run --rm --name {{airflow_imageName}} -d -p {d['host_port']}:{d['container_port']} -e PORT={d['container_port']} {full_imagePath}"
-        print(command);
-        operators[task_id] = BashOperator(
-                task_id=task_id,
-                bash_command=command,
-                dag=dag,
-                xcom_push=True,
-        )
-    return operators
-#}}
-
-def generate_setupOperator_rqService(): #{{
-        operators = {}
-        task_id=f"setup--requestService"
-        today_date = datetime.datetime.now().strftime("%d%m%Y")
-        command=f'docker run --rm --name requests_manager -dt --network="host" -v {os.environ["TEANGA_DIR"]}/files:/teanga/files -v {os.environ["TEANGA_DIR"]}/OAS:/teanga/OAS -v {os.environ["TEANGA_DIR"]}/IO:/teanga/IO -v {os.environ["TEANGA_DIR"]}/workflows:/teanga/workflows -v {os.environ["TEANGA_DIR"]}/services:/teanga/services  rq_manager:{today_date}'
-        print(command);
-        operators[task_id] = BashOperator(
-                task_id=task_id,
-                bash_command=command,
-                dag=dag,
-                xcom_push=True,
-        )
-        return operators
-    #}}
-
-def generate_initWebserver_operators(list_of_containers): #{
-    """
-    """
-    operators = {}
-    for workflow_id,service_info in list_of_containers:
-        d = service_info
-        if d['repo']:
-            image_localId = f"{d['repo']}/{d['image_id']}:{d['image_tag']}" 
-        else:
-            image_localId = f"{d['image_id']}:{d['image_tag']}" 
-        setup_task_id=f"setup--workflow_{workflow_id}--{d['image_id']}--{d['image_tag']}--{d['port']}"
-        task_id=f"initWebserver--{d['image_id']}--{d['image_tag']}--{d['port']}"
-
-        command=f'docker exec -d {{{{ task_instance.xcom_pull(task_ids="{setup_task_id}") }}}} sh -c "/app/webserver.sh {d["port"]}"'
-        #f'echo {{{{ task_instance.xcom_pull(task_ids="{setup_task_id}") }}}} >> /teanga/text.txt'
+        command=f"docker run --rm --name {airflow_imageName} -d -p {d['host_port']}:{d['container_port']} -e PORT={d['container_port']} {full_imagePath}"
         print(command);
         operators[task_id] = BashOperator(
                 task_id=task_id,
@@ -142,6 +106,63 @@ def generate_dockercp_operators(workflow_steps): #{
     return operators
 #}}
 
+def generate_validateWorkflow_operator(): #{
+    """
+    """
+    operators = {}    
+    task_id=f"validating--workflow"
+    command=f'python3 /teanga/workflow_validation.py'
+    operators[task_id] = BashOperator(
+            task_id=task_id,
+            bash_command=command,
+            dag=dag,
+            xcom_push=True,
+    )
+    return operators
+#}}
+
+def generate_requests_subDag(default_args, dag): #{
+    """
+    airflow.exceptions.AirflowException: The subdag's dag_id should have the form '{parent_dag_id}.{this_task_id}'. Expected 'naisc_local_workflow.json.requests--DAG'; received 'requests_DAG'.
+    """
+    dag_subdag = DAG(
+        dag_id=f'naisc_local_workflow.json.requests--DAG',
+        default_args=default_args,
+        schedule_interval=None,
+    )
+    with dag_subdag:
+        for i in range(5):
+            t = DummyOperator(
+                task_id='load_subdag_{0}'.format(i),
+                default_args=default_args,
+                dag=dag_subdag,
+            )
+    operators = {}    
+    task_id=f"requests--DAG"
+    operators[task_id] = SubDagOperator(
+        task_id=task_id,
+        subdag=dag_subdag,
+        default_args=default_args,
+        dag=dag,
+    )
+    return operators
+#}}
+
+def generate_setupOperator_rqService(): #{{
+        operators = {}
+        task_id=f"setup--requestService"
+        today_date = datetime.datetime.now().strftime("%d%m%Y")
+        command=f'docker run --rm --name requests_manager -dt --network="host" -v {os.environ["TEANGA_DIR"]}/files:/teanga/files -v {os.environ["TEANGA_DIR"]}/OAS:/teanga/OAS -v {os.environ["TEANGA_DIR"]}/IO:/teanga/IO -v {os.environ["TEANGA_DIR"]}/workflows:/teanga/workflows -v {os.environ["TEANGA_DIR"]}/services:/teanga/services  rq_manager:{today_date}'
+        print(command);
+        operators[task_id] = BashOperator(
+                task_id=task_id,
+                bash_command=command,
+                dag=dag,
+                xcom_push=True,
+        )
+        return operators
+    #}}
+
 def generate_executeRequests_operator(): #{
     """
     """
@@ -157,28 +178,22 @@ def generate_executeRequests_operator(): #{
     return operators
 #}}
 
-def generate_echo_operators(list_of_containers): #{
-    """
-    """
-    operators = {}
-    for workflow_id,service_info in list_of_containers:
-        d = service_info
-        if d['repo']:
-            image_localId = f"{d['repo']}/{d['image_id']}:{d['image_tag']}" 
-        else:
-            image_localId = f"{d['image_id']}:{d['image_tag']}" 
-        setup_task_id=f"setup--workflow_{workflow_id}--{d['image_id']}--{d['image_tag']}"
-        task_id=f"echo--{d['image_id']}--{d['image_tag']}"
-        command=f'echo {{{{ task_instance.xcom_pull(task_ids="{setup_task_id}") }}}} >> /teanga/text.txt'
-        print(command);
-        operators[task_id] = BashOperator(
-                task_id=task_id,
-                bash_command=command,
-                dag=dag,
-                xcom_push=True,
-        )
-    return operators
-#}}
+def generate_endpointRequest_operator(workflow_step, endpoint_name,endpoint_info):#{
+    def print_context(ds, **kwargs):
+        pprint(kwargs)
+        print(ds)
+        return 'Whatever you return gets printed in the logs'
+
+
+    operator = PythonOperator(
+        task_id=f'step-{workflow_step}-endpoint-{endpoint_name}',
+        provide_context=True,
+        python_callable=print_context,
+        op_kwargs={'key1': 'value1', 'key2': 'value2'},
+        dag=dag,
+    )
+    return operator 
+#}
 
 def generate_stop_operators(unique_services): #{{
     """
@@ -199,8 +214,8 @@ def generate_stop_operators(unique_services): #{{
     return operators
 #}}
 
-def groupby_services(workflow_filepath):
-    import json# #{
+def groupby_services(workflow_filepath):# #{
+    import json
     with open(workflow_filepath) as workflow_input:
         workflow = json.load(workflow_input)
         unique_services = {}
@@ -220,13 +235,43 @@ def groupby_services(workflow_filepath):
     return workflow, unique_services# #}
 
 
+
 #{{ dynamic dag setup
+
+docker_client = docker.from_env()
+base_folder=os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+today_date = datetime.datetime.now().strftime("%d%m%Y")
+workflow_filename = os.environ['TARGET_WORKFLOW'] #f'dev_naisc_workflow_{today_date}.json'#"dev_workflow.json"
+workflow_filepath = os.path.join(base_folder,"workflows",workflow_filename)
+dagCreation_timeStr = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
+
+workflow, unique_services = groupby_services(workflow_filepath)
+for service_id in unique_services.keys():
+    if docker_client.images.get(service_id):
+        print("already exists")
+        docker_image = docker_client.images.get(service_id)
+    else:
+        docker_image = docker_client.images.pull(service_id)
+    if docker_image in docker_client.images.list():
+        container = docker_client.containers.create(docker_image)
+        bits, stats = container.get_archive("/openapi.yaml")
+        openapi_filename = service_id.replace("/","_")
+        with open(f'/teanga/OAS/{openapi_filename}','wb') as outf:
+            for bit in bits:
+                outf.write(bit)
+        container.remove()
+
+for step in workflow.keys():
+    if workflow[step]['dependencies']:
+        pass
+
 global default_args
 #{{
 default_args = {
-    'owner': 'airflow',
+    'owner': 'teanga',
     'depends_on_past': False,
     'start_date': days_ago(2),
+    'schedule_interval': None,
     'email': ['airflow@example.com'],
     'email_on_failure': False,
     'email_on_retry': False,
@@ -248,15 +293,9 @@ default_args = {
 }
 #}}
 
-
-dagCreation_timeStr = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
 global dag
-dag = generate_dag(f"teangaWorkflow","runs the workflow described in given workflow json file ")
+dag = generate_dag(f"{workflow_filename}","runs the workflow described in given workflow json file ")
 
-base_folder=os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-today_date = datetime.datetime.now().strftime("%d%m%Y")
-workflow_filename = os.environ['TARGET_WORKFLOW'] #f'dev_naisc_workflow_{today_date}.json'#"dev_workflow.json"
-workflow_filepath = os.path.join(base_folder,"workflows",workflow_filename)
 operators_instances = {}
 
 workflow, unique_services = groupby_services(workflow_filepath)
@@ -271,12 +310,17 @@ operators_instances["pull_operators_instances"] = generate_pull_operators(unique
 
 # services setup operators_instances
 operators_instances["setup_operators_instances"] = generate_setup_operators(unique_services)
+operators_instances[f"generate_endpointRequest_operator"] = []
+for workflow_step, step_input in workflow.items():
+    operators_instances[f"generate_endpointRequest_operator"].append(generate_endpointRequest_operator(workflow_step, step_input["operation_id"], step_input))
+
+
+
+"""
 # docker cp operators_instances
 operators_instances["dockercp_operators_instances"] = generate_dockercp_operators(workflow)
-
 # docker setup requestService operators_instances
 operators_instances["setupOperator_requestService"] = generate_setupOperator_rqService()
-"""
 operators_instances["execOperator_requestService"] = generate_executeRequests_operator()
 # docker stop operators_instances
 operators_instances["stop_operators_instances"] = generate_stop_operators(unique_services)
@@ -287,9 +331,10 @@ operators_instances["stop_operators_instances"] = generate_stop_operators(unique
 #{{
 pull_operators_instances = [operator for operator in operators_instances["pull_operators_instances"].values()]
 setup_operators_instances = [operator for operator in operators_instances["setup_operators_instances"].values()]
+rq_operators_instances = [operator for operator in operators_instances["generate_endpointRequest_operator"]]
+"""
 dockercp_operators_instances = [operator for operator in operators_instances["dockercp_operators_instances"].values()]
 setupRequestService_operator_instances = [operator for operator in operators_instances["setupOperator_requestService"].values()]
-"""
 executeRequest_operator_instance = [operator for operator in operators_instances["execOperator_requestService"].values()]
 stop_operators_instance = [operator for operator in operators_instances["stop_operators_instances"].values()]
 """
@@ -297,14 +342,16 @@ stop_operators_instance = [operator for operator in operators_instances["stop_op
 for pull_operators_instance in pull_operators_instances:
     pull_operators_instance >> setup_operators_instances
 
+for workflow_step, step_input in list(workflow.items()):
+   if not step_input["dependencies"]:
+       setup_operators_instances >> rq_operators_instances[int(workflow_step)-1]
+   for dependency_step in step_input["dependencies"]:
+       rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+"""
 for setup_operator_instance in setup_operators_instances :
    setup_operator_instance >> dockercp_operators_instances
 
 
-for docker_operator_instance in dockercp_operators_instances:
-  docker_operator_instance >> setupRequestService_operator_instances 
-
-"""
 for setup_operator_instance in setupRequestService_operator_instances:
     setup_operator_instance >> executeRequest_operator_instance
 
