@@ -234,8 +234,41 @@ def groupby_services(workflow_filepath):# #{
                 workflow[workflow_id]['container_port'] = unique_services[service_id][0][1]['container_port'] 
     return workflow, unique_services# #}
 
+def flatten_operator(id):#{{
+    operators = {}    
+    task_id=f"flatten--{id}"
+    command=f'echo testing'
+    return BashOperator(
+            task_id=task_id,
+            bash_command=command,
+            dag=dag,
+            xcom_push=True,
+    )
+#}}
 
+def concatenate_operator(id):#{{
+    operators = {}    
+    task_id=f"concatenate--{id}"
+    command=f'echo testing'
+    return BashOperator(
+            task_id=task_id,
+            bash_command=command,
+            dag=dag,
+            xcom_push=True,
+    )
+#}}
 
+def groupby_operator(id):#{{
+    operators = {}    
+    task_id=f"groupby--{id}"
+    command=f'echo testing'
+    return BashOperator(
+            task_id=task_id,
+            bash_command=command,
+            dag=dag,
+            xcom_push=True,
+    )
+#}}
 #{{ dynamic dag setup
 
 docker_client = docker.from_env()
@@ -260,10 +293,6 @@ for service_id in unique_services.keys():
             for bit in bits:
                 outf.write(bit)
         container.remove()
-
-for step in workflow.keys():
-    if workflow[step]['dependencies']:
-        pass
 
 global default_args
 #{{
@@ -301,7 +330,6 @@ operators_instances = {}
 workflow, unique_services = groupby_services(workflow_filepath)
 with open(os.path.join(base_folder,"workflows",f'updated_{workflow_filename}'),"w") as updated_workflow:
     updated_workflow.write(json.dumps(workflow))
-
 
 # instanciate operators
 #{{
