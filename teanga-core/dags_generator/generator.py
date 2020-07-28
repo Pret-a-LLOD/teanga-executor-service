@@ -373,8 +373,39 @@ for pull_operators_instance in pull_operators_instances:
 for workflow_step, step_input in list(workflow.items()):
    if not step_input["dependencies"]:
        setup_operators_instances >> rq_operators_instances[int(workflow_step)-1]
-   for dependency_step in step_input["dependencies"]:
-       rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+   for dependency in step_input["dependencies"]:
+       if dependency["operator"] == "wait": 
+           for dependency_step in dependency["steps"]:
+               rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+
+       elif dependency["operator"] == "pass":
+           rq_operators_instances[int(workflow_step)-1].IO = []
+           for dependency_step in dependency["steps"]:
+               rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+               rq_operators_instances[int(workflow_step)-1].IO.append(f'{{{{ task_instance.xcom_pull(task_ids="{rq_operators_instances[int(dependency_step)-1].task_id}") }}}}')
+
+       elif dependency["operator"] == "flatten": 
+           print(dependency)
+           operator = flatten_operator(f'step-{workflow_step}')
+           rq_operators_instances[int(dependency_step)] >> operator
+           operator >> rq_operators_instances[int(workflow_step)-1]
+
+       elif dependency["operator"] == "concatenate": 
+           print(dependency)
+           operator = concatenate_operator(f'step-{workflow_step}')
+           for dependency_step in dependency["steps"]:
+            if isinstance(dependency_step,dict):
+               operator_ = groupby_operator(f'123step-{workflow_step}')
+               for dependency_step_ in dependency_step["steps"]:
+                   rq_operators_instances[int(dependency_step_)-1] >> operator_ 
+                   operator_ >> operator
+            elif isinstance(dependency_step,str):
+               rq_operators_instances[int(dependency_step)-1] >> operator 
+               operator >> rq_operators_instances[int(workflow_step)-1]
+       elif dependency["operator"] == "compose": 
+           print(dependency)
+           for dependency_step in dependency["steps"]:
+               rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
 """
 for setup_operator_instance in setup_operators_instances :
    setup_operator_instance >> dockercp_operators_instances
