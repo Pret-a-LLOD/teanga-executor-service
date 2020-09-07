@@ -7,11 +7,15 @@ from airflow.operators import SubDagOperator
 from airflow.utils.dates import days_ago
 
 import docker
+from docker.errors import ImageNotFound
 import sys
 import logging
 import os
 import json
+import yaml
 import datetime
+from io import StringIO, BytesIO
+import tarfile
 
 def generate_dag(name, description): #{{
     """
@@ -163,7 +167,19 @@ def generate_setupOperator_rqService(): #{{
         return operators
     #}}
 
-def generate_executeRequests_operator(): #{
+def request_function(step_id): #{{
+    return id
+
+def request_operator(id):
+    operators = {}    
+    task_id=f"request--{id}"
+    return PythonOperator(
+        task_id=task_id,
+        python_callable=request_function,
+        op_kwargs={'id': id},
+        dag=dag)
+
+def generate_executeRequests_operator(): 
     """
     """
     operators = {}    
@@ -214,8 +230,7 @@ def generate_stop_operators(unique_services): #{{
     return operators
 #}}
 
-def groupby_services(workflow_filepath):# #{
-    import json
+def groupby_services(workflow_filepath):#{
     with open(workflow_filepath) as workflow_input:
         workflow = json.load(workflow_input)
         unique_services = {}
@@ -258,6 +273,51 @@ def concatenate_operator(id):#{{
     )
 #}}
 
+def compose_operator(id):#{{
+    operators = {}    
+    task_id=f"compose--{id}"
+    command=f'echo testing'
+    return BashOperator(
+            task_id=task_id,
+            bash_command=command,
+            dag=dag,
+            xcom_push=True,
+    )
+#}}
+
+def matching_operator(airflowOperator_id):#{{ 
+    operators = {}    
+    task_id=f"matching--{airflowOperator_id}"
+    return PythonOperator(
+        task_id=task_id,
+        python_callable=matching_function,
+        op_kwargs={'airflowOperator_id': airflowOperator_id},
+        dag=dag)
+
+def matching_function(**kwargs):
+    # 1 get expected inputs
+    # 2 check if there's user input and depencencies input
+    # 3 match
+    return kwargs['id']
+#}}
+
+def get_spec_from_operationId(OAS, operationId):
+    flatten = {}
+    for url in OAS['paths'].keys():
+        for request_method in OAS['paths'][url].keys():
+            operation_data=OAS['paths'][url][request_method]
+            if operation_data["operationId"] == operationId:
+                flatten["endpoint"] = url
+                flatten["request_method"] = request_method
+                flatten["parameters"] =  operation_data.get("parameters",[])
+                flatten["requestBody"] =  operation_data.get("requestBody",{})
+                flatten["sucess_response"] = operation_data["responses"]["200"]
+                flatten["response_schema_name"] = \
+                        flatten["sucess_response"]['content']['application/json']['schema']\
+                        if flatten["sucess_response"].get('content',False) else None
+    flatten["schemas"] = OAS['components']['schemas']
+    return flatten 
+
 def groupby_operator(id):#{{
     operators = {}    
     task_id=f"groupby--{id}"
@@ -268,7 +328,7 @@ def groupby_operator(id):#{{
             dag=dag,
             xcom_push=True,
     )
-#}}
+#}}G
 #{{ dynamic dag setup
 
 docker_client = docker.from_env()
@@ -278,21 +338,39 @@ workflow_filename = os.environ['TARGET_WORKFLOW'] #f'dev_naisc_workflow_{today_d
 workflow_filepath = os.path.join(base_folder,"workflows",workflow_filename)
 dagCreation_timeStr = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
 
-workflow, unique_services = groupby_services(workflow_filepath)
-for service_id in unique_services.keys():
-    if docker_client.images.get(service_id):
-        print("already exists")
+# making sure just one container per service is run. grouping steps on the workflow by service
+# copying OAS file to teanga container and adding it to workflow dictionary
+workflow, unique_services = groupby_services(workflow_filepath)#{{
+print(f"WORKFLOW: {workflow}")
+print(f"UK : {unique_services}")
+for service_id, steps_using_service in unique_services.items():
+    try: 
         docker_image = docker_client.images.get(service_id)
-    else:
+        print("already exists")
+    except ImageNotFound:
         docker_image = docker_client.images.pull(service_id)
     if docker_image in docker_client.images.list():
         container = docker_client.containers.create(docker_image)
-        bits, stats = container.get_archive("/openapi.yaml")
+        stream, stats = container.get_archive("/openapi.yaml")
         openapi_filename = service_id.replace("/","_")
-        with open(f'/teanga/OAS/{openapi_filename}','wb') as outf:
-            for bit in bits:
-                outf.write(bit)
+        file_obj = BytesIO()
+        for i in stream:
+            file_obj.write(i)
+        file_obj.seek(0)
+        tar = tarfile.open(mode='r', fileobj=file_obj)
+        tar.extractall("/teanga/OAS")
+        tar.close()
+        os.rename("/teanga/OAS/openapi.yaml",f'/teanga/OAS/{openapi_filename}')
         container.remove()
+        service_openapi_spec = yaml.load(open(f'/teanga/OAS/{openapi_filename}'),Loader=yaml.FullLoader)
+        for (workflow_id, d) in steps_using_service:
+            operation_id  = d["operation_id"]
+            workflow[workflow_id]["operation_spec"] = get_spec_from_operationId(service_openapi_spec, operation_id) 
+
+with open(os.path.join(base_folder,"workflows",f'updated_{workflow_filename}'),"w") as updated_workflow:
+    updated_workflow.write(json.dumps(workflow))
+#}}
+
 
 global default_args
 #{{
@@ -321,15 +399,9 @@ default_args = {
     # 'trigger_rule': 'all_success'
 }
 #}}
-
 global dag
 dag = generate_dag(f"{workflow_filename}","runs the workflow described in given workflow json file ")
-
 operators_instances = {}
-
-workflow, unique_services = groupby_services(workflow_filepath)
-with open(os.path.join(base_folder,"workflows",f'updated_{workflow_filename}'),"w") as updated_workflow:
-    updated_workflow.write(json.dumps(workflow))
 
 # instanciate operators
 #{{
@@ -360,6 +432,7 @@ operators_instances["stop_operators_instances"] = generate_stop_operators(unique
 pull_operators_instances = [operator for operator in operators_instances["pull_operators_instances"].values()]
 setup_operators_instances = [operator for operator in operators_instances["setup_operators_instances"].values()]
 rq_operators_instances = [operator for operator in operators_instances["generate_endpointRequest_operator"]]
+
 """
 dockercp_operators_instances = [operator for operator in operators_instances["dockercp_operators_instances"].values()]
 setupRequestService_operator_instances = [operator for operator in operators_instances["setupOperator_requestService"].values()]
@@ -370,13 +443,20 @@ stop_operators_instance = [operator for operator in operators_instances["stop_op
 for pull_operators_instance in pull_operators_instances:
     pull_operators_instance >> setup_operators_instances
 
+# MAPPING each step on the workflow to a set of airflow operators    
 for workflow_step, step_input in list(workflow.items()):
+   dependencies_inputs = [step_input["input"]]
+   pre_operator = matching_operator(f'step-{workflow_step}')
    if not step_input["dependencies"]:
-       setup_operators_instances >> rq_operators_instances[int(workflow_step)-1]
-   for dependency in step_input["dependencies"]:
+       setup_operators_instances >> pre_operator 
+       pre_operator >> rq_operators_instances[int(workflow_step)-1]
+       pre_operator.op_kwargs.update(step_input)
+       pre_operator.op_kwargs.update({"dependencies":step_input})
+
+   for dependency in step_input["dependencies"]: #{{
        if dependency["operator"] == "wait": 
            for dependency_step in dependency["steps"]:
-               rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+               rq_operators_instances[int(dependency_step)-1] >> pre_operator #rq_operators_instances[int(workflow_step)-1]
 
        elif dependency["operator"] == "pass":
            rq_operators_instances[int(workflow_step)-1].IO = []
@@ -385,27 +465,29 @@ for workflow_step, step_input in list(workflow.items()):
                rq_operators_instances[int(workflow_step)-1].IO.append(f'{{{{ task_instance.xcom_pull(task_ids="{rq_operators_instances[int(dependency_step)-1].task_id}") }}}}')
 
        elif dependency["operator"] == "flatten": 
-           print(dependency)
            operator = flatten_operator(f'step-{workflow_step}')
            rq_operators_instances[int(dependency_step)] >> operator
            operator >> rq_operators_instances[int(workflow_step)-1]
 
        elif dependency["operator"] == "concatenate": 
-           print(dependency)
            operator = concatenate_operator(f'step-{workflow_step}')
            for dependency_step in dependency["steps"]:
             if isinstance(dependency_step,dict):
-               operator_ = groupby_operator(f'123step-{workflow_step}')
+               operator_ = groupby_operator(f'step-{workflow_step}')
                for dependency_step_ in dependency_step["steps"]:
                    rq_operators_instances[int(dependency_step_)-1] >> operator_ 
                    operator_ >> operator
             elif isinstance(dependency_step,str):
                rq_operators_instances[int(dependency_step)-1] >> operator 
                operator >> rq_operators_instances[int(workflow_step)-1]
+
        elif dependency["operator"] == "compose": 
-           print(dependency)
+           operator_ = compose_operator(f'step-{workflow_step}')
            for dependency_step in dependency["steps"]:
-               rq_operators_instances[int(dependency_step)-1] >> rq_operators_instances[int(workflow_step)-1]
+               rq_operators_instances[int(dependency_step)-1] >> operator_
+           operator_ >> rq_operators_instances[int(workflow_step)-1]
+
+#}}
 """
 for setup_operator_instance in setup_operators_instances :
    setup_operator_instance >> dockercp_operators_instances
