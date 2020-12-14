@@ -451,18 +451,9 @@ def get_spec_from_operationId(OAS, operationId):#{
                         if flatten["sucess_response"].get('content',False) else None
     flatten["schemas"] = OAS['components']['schemas']
     return flatten 
+#}
 
-def groupby_operator(id):#{{
-    operators = {}    
-    task_id=f"groupby--{id}"
-    command=f'echo testing'
-    return BashOperator(
-            task_id=task_id,
-            bash_command=command,
-            dag=dag,
-            xcom_push=True,
-    )
-#}}G
+
 #{{ dynamic dag setup
 
 docker_client = docker.from_env()
@@ -582,6 +573,7 @@ for workflow_step, step_input in list(workflow.items()):
    dependencies_inputs = [step_input["input"]]
    pre_operator = matching_operator(f'step-{workflow_step}')
    if not step_input["dependencies"]:
+       import ipdb;ipdb.set_trace()
        setup_operators_instances >> pre_operator 
        pre_operator >> rq_operators_instances[int(workflow_step)-1]
        pre_operator.op_kwargs.update(step_input)
