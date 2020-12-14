@@ -4,12 +4,12 @@ RUN apt-get -y update
 RUN apt-get install  -y python3-pip python3-dev
 RUN apt-get install -y docker.io
 
-WORKDIR /teanga
-ENV AIRFLOW_HOME /teanga
-RUN chmod +x /teanga
-copy ./pip_requirements.txt /teanga/pip_requirements.txt
+WORKDIR /teanga-core
+ENV AIRFLOW_HOME /teanga-core
+RUN chmod +x /teanga-core
+copy ./pip_requirements.txt /teanga-core/pip_requirements.txt
 RUN pip3 install -r pip_requirements.txt
-copy ./ /teanga
+copy ./ /teanga-core
 RUN airflow initdb
-RUN chmod +x /teanga/init.sh
+RUN chmod +x /teanga-core/init.sh
 CMD ["./init.sh"]  
